@@ -19,3 +19,7 @@ enable_service cinder,c-api,c-sch,c-vol
 
 
 ./stack.sh
+
+To download img file for block storage
+wget https://raw.githubusercontent.com/YOUR_USERNAME/ubuntu-download/main/cirros-0.6.2-x86_64-disk.img
+.
