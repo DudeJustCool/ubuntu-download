@@ -1,0 +1,120 @@
+sudo apt update
+
+sudo apt install openjdk-8-jdk -y
+
+java -version
+
+cd ~
+
+wget https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+
+tar -xvzf hadoop-3.3.6.tar.gz
+
+sudo mv hadoop-3.3.6 /usr/local/Hadoop
+Configure environment:
+nano ~/.bashrc
+
+Add:
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export HADOOP_HOME=/usr/local/Hadoop
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+
+Then:
+source ~/.bashrc
+
+Configure Hadoop:
+Hadoop env -
+sudo nano /usr/local/Hadoop/etc/hadoop/hadoop-env.sh
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
+Core
+sudo nano /usr/local/Hadoop/etc/hadoop/core-site.xml
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://localhost:9000</value>
+    </property>
+</configuration>
+
+
+HDFS
+sudo nano /usr/local/Hadoop/etc/hadoop/hdfs-site.xml
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:///usr/local/Hadoop/hadoop_data/hdfs/namenode</value>
+    </property>
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file:///usr/local/Hadoop/hadoop_data/hdfs/datanode</value>
+    </property>
+</configuration>
+
+
+Create directories:
+sudo mkdir -p /usr/local/Hadoop/hadoop_data/hdfs/namenode
+sudo mkdir -p /usr/local/Hadoop/hadoop_data/hdfs/datanode
+
+sudo chown -R $USER:$USER /usr/local/Hadoop/hadoop_data
+
+SSH key installation:
+sudo apt update
+sudo apt install openssh-server openssh-client -y
+sudo systemctl enable ssh
+sudo systemctl start ssh
+sudo systemctl status ssh
+ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/id_rsa
+chmod 644 ~/.ssh/id_rsa.pub
+ssh localhost
+
+Format:
+hdfs namenode -format
+
+Start:
+start-dfs.sh
+
+Verify:
+jps
+
+Check DataNode:
+hdfs dfsadmin -report
+
+Create HDFS structure:
+hdfs dfs -mkdir /user
+hdfs dfs -mkdir /user/hadoop
+hdfs dfs -mkdir /user/hadoop/input
+hdfs dfs -mkdir /user/hadoop/output
+
+Upload:
+hdfs dfs -put student.txt /user/hadoop/input/
+
+View:
+hdfs dfs -ls /user/hadoop/input
+hdfs dfs -cat /user/hadoop/input/student.txt
+
+Copy:
+hdfs dfs -cp /user/hadoop/input/student.txt /user/hadoop/output/
+
+Rename:
+hdfs dfs -mv /user/hadoop/output/student.txt /user/hadoop/output/student_details.txt
+
+Download:
+hdfs dfs -get /user/hadoop/output/student_details.txt .
+
+Delete:
+hdfs dfs -rm /user/hadoop/output/student_details.txt
+
+Stop:
+stop-dfs.sh
